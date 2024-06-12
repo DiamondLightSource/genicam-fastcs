@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: genicam-fastcs
+  title: genicam-fastcs
+  description: FastCS support for a GeniCam
+spec:
+  type: documentation
+  lifecycle: experimental
+  owner: group:default/sscc

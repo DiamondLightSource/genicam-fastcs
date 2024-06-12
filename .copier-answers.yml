@@ -1,0 +1,16 @@
+# Changes here will be overwritten by Copier
+_commit: 2.1.0
+_src_path: gh:DiamondLightSource/python-copier-template
+author_email: marcell.nagy@diamond.ac.uk
+author_name: Marcell Nagy
+component_owner: group:default/sscc
+description: FastCS support for a GeniCam
+distribution_name: genicam-fastcs
+docker: true
+docs_type: README
+git_platform: github.com
+github_org: DiamondLightSource
+package_name: genicam_fastcs
+pypi: true
+repo_name: genicam-fastcs
+type_checker: pyright
