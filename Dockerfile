@@ -8,6 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     graphviz \
     && rm -rf /var/lib/apt/lists/*
 
+# Install GenTL producer
+ARG MATRIX_VERSION=2.29.0
+RUN curl -O http://static.matrix-vision.com/mvIMPACT_Acquire/${MATRIX_VERSION}/mvGenTL_Acquire-x86_64_ABI2-${MATRIX_VERSION}.tgz \
+    && wget http://static.matrix-vision.com/mvIMPACT_Acquire/${MATRIX_VERSION}/install_mvGenTL_Acquire.sh \
+    && bash install_mvGenTL_Acquire.sh
+
 # Set up a virtual environment and put it in PATH
 RUN python -m venv /venv
 ENV PATH=/venv/bin:$PATH
@@ -23,6 +29,8 @@ FROM python:${PYTHON_VERSION}-slim as runtime
 # Add apt-get system dependecies for runtime here if needed
 COPY --from=build /venv/ /venv/
 ENV PATH=/venv/bin:$PATH
+
+COPY --from=build opt/mvIMPACT_Acquire/ opt/mvIMPACT_Acquire/
 
 # change this entrypoint if it is not the same as the repo
 ENTRYPOINT ["genicam-fastcs"]
