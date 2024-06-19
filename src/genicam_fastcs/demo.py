@@ -1,3 +1,5 @@
+import ipaddress
+
 import cv2
 import numpy as np
 from genicam.genapi import AccessException, LogicalErrorException
@@ -14,22 +16,20 @@ N_FRAMES = 20
 CHANNELS = 1
 
 
-class GeniCamNotFoundError(Exception):
+class GenICamNotFoundError(Exception):
     pass
 
 
-class GeniCam:
+class GenICam:
     def __init__(self):
-        self.h = Harvester()
-        self.h.add_file(SDK_CTI_PATH)
+        self.h = Harvester()  # GenICam consumer
+        self.h.add_file(SDK_CTI_PATH)  # GenICam producer
         self.h.update()
 
         print(self.h.device_info_list)
 
-        link_speed = self._get_speed("serial_number", CAMERA_SERIAL)
-        print(f"[INFO] Link speed is {link_speed} Mbps")
+        self._print_link_info("serial_number", CAMERA_SERIAL)
         print("[INFO] Connecting to camera, please wait...")
-
         self.ia = self.h.create({"serial_number": CAMERA_SERIAL})  # Image acquirer
 
         self.ia.remote_device.node_map.Width.value = WIDTH
@@ -39,7 +39,7 @@ class GeniCam:
         self.ia.remote_device.node_map.Gain.value = 20
         self.ia.start()  # start image acquisition
 
-    def _get_speed(self, key, value):
+    def _print_link_info(self, key, value):
         dev_parent = None
         for dev_info in self.h.device_info_list:
             dev_dict = dev_info._property_dict
@@ -48,9 +48,12 @@ class GeniCam:
                     dev_parent = dev_info.parent
                     break
         if not dev_parent:
-            raise GeniCamNotFoundError
-
-        return dev_parent.node_map.mvGevInterfaceLinkSpeed.value
+            raise GenICamNotFoundError
+        int_address = dev_parent.node_map.GevDeviceIPAddress.value
+        ip_address = str(ipaddress.ip_address(int_address))
+        link_speed = dev_parent.node_map.mvGevInterfaceLinkSpeed.value
+        print(f"[INFO] IP Address: {ip_address}")
+        print(f"[INFO] Link speed is {link_speed} Mbps")
 
     def run(self, output):
         # Preallocate an array that will temporarily store frames
@@ -130,7 +133,7 @@ class GeniCam:
 
 
 if __name__ == "__main__":
-    dev = GeniCam()
+    dev = GenICam()
     dev.print_temperature()
     dev.print_exposure_enums()
     print(dev.list_commands())
