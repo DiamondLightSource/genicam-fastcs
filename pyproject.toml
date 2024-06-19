@@ -14,7 +14,11 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 description = "FastCS support for a GeniCam"
-dependencies = ["harvesters"] # Add project dependencies here, e.g. ["click", "numpy"]
+dependencies = [
+    "harvesters",
+    "numpy<2",
+    "opencv-python",
+] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
