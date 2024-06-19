@@ -9,10 +9,12 @@ WIDTH = 1920  # Image buffer width
 HEIGHT = 1200  # Image buffer height
 PIXEL_FORMAT = "Mono8"  # Camera pixel format
 SDK_CTI_PATH = "/opt/mvIMPACT_Acquire/lib/x86_64/mvGenTLProducer.cti"
-CAMERA_SERIAL = "50-0536906292"  # Camera product model
+# CAMERA_SERIAL = "50-0536906292"  # Camera product model
+# CAMERA_SERIAL = "50-0503346450"  # Camera product model
+CAMERA_SERIAL = "17497407"  # Camera product model
 FPS = 32
 OUTPUT = "RESULT"  # video name (without extension)
-N_FRAMES = 20
+N_FRAMES = 30
 CHANNELS = 1
 
 
@@ -23,19 +25,26 @@ class GenICamNotFoundError(Exception):
 class GenICam:
     def __init__(self):
         self.h = Harvester()  # GenICam consumer
-        self.h.add_file(SDK_CTI_PATH)  # GenICam producer
+        self.h.add_file(SDK_CTI_PATH)  # Add GenICam producer
         self.h.update()
 
         print(self.h.device_info_list)
-
         self._print_link_info("serial_number", CAMERA_SERIAL)
+
         print("[INFO] Connecting to camera, please wait...")
         self.ia = self.h.create({"serial_number": CAMERA_SERIAL})  # Image acquirer
 
         self.ia.remote_device.node_map.Width.value = WIDTH
         self.ia.remote_device.node_map.Height.value = HEIGHT
-        self.ia.remote_device.node_map.AcquisitionFrameRateAbs.value = FPS
         self.ia.remote_device.node_map.PixelFormat.value = PIXEL_FORMAT
+
+        if CAMERA_SERIAL == "17497407":
+            self.ia.remote_device.node_map.AcquisitionFrameRateEnable.value = True
+            self.ia.remote_device.node_map.AcquisitionFrameRate.value = FPS
+            self.ia.remote_device.node_map.GainAuto.value = "Off"
+        else:
+            self.ia.remote_device.node_map.AcquisitionFrameRateAbs.value = FPS
+
         self.ia.remote_device.node_map.Gain.value = 20
         self.ia.start()  # start image acquisition
 
@@ -51,8 +60,11 @@ class GenICam:
             raise GenICamNotFoundError
         int_address = dev_parent.node_map.GevDeviceIPAddress.value
         ip_address = str(ipaddress.ip_address(int_address))
+        int_subnet = dev_parent.node_map.GevDeviceSubnetMask.value
+        subnet_addr = str(ipaddress.ip_address(int_subnet))
         link_speed = dev_parent.node_map.mvGevInterfaceLinkSpeed.value
         print(f"[INFO] IP Address: {ip_address}")
+        print(f"[INFO] Subnet: {subnet_addr}")
         print(f"[INFO] Link speed is {link_speed} Mbps")
 
     def run(self, output):
@@ -91,7 +103,7 @@ class GenICam:
     def print_exposure_enums(self):
         symbs = (
             self.ia.remote_device.node_map.ExposureAuto.symbolics
-        )  # Only defined for enums
+        )  # Only defined for IEnumerations
         print(symbs)
 
     def _list_children(self, object, key):
@@ -108,10 +120,12 @@ class GenICam:
         return child_list
 
     def list_commands(self):
+        """ICommand interfaces"""
         map = self.ia.remote_device.node_map
         return self._list_children(map, "execute")
 
     def list_attributes(self):
+        """IEnumeration, IBoolean, IFloat, IInteger interfaces"""
         map = self.ia.remote_device.node_map
         return self._list_children(map, "value")
 
