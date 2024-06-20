@@ -19,18 +19,10 @@ RUN python -m venv /venv
 ENV PATH=/venv/bin:$PATH
 
 # The build stage installs the context into the venv
-FROM developer as build
+FROM developer as runtime
 COPY . /context
 WORKDIR /context
 RUN pip install .
-
-# The runtime stage copies the built venv into a slim runtime container
-FROM python:${PYTHON_VERSION}-slim as runtime
-# Add apt-get system dependecies for runtime here if needed
-COPY --from=build /venv/ /venv/
-ENV PATH=/venv/bin:$PATH
-
-COPY --from=build opt/mvIMPACT_Acquire/ opt/mvIMPACT_Acquire/
 
 # change this entrypoint if it is not the same as the repo
 ENTRYPOINT ["genicam-fastcs"]
