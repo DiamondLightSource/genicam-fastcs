@@ -6,6 +6,7 @@ FROM python:${PYTHON_VERSION} as developer
 # Add any system dependencies for the developer/build environment here
 RUN apt-get update && apt-get install -y --no-install-recommends \
     graphviz \
+    iproute2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install GenTL producer
