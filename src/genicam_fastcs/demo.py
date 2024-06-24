@@ -15,10 +15,11 @@ SDK_CTI_PATH = (
 # CAMERA_SERIAL = "50-0536906292"  # Camera product model
 # CAMERA_SERIAL = "50-0503346450"  # Camera product model
 CAMERA_SERIAL = "17497407"  # Camera product model
-FPS = 155  # 32
+FPS = 120  # 32
 OUTPUT = "RESULT"  # video name (without extension)
-N_FRAMES = 100
+N_FRAMES = 120
 CHANNELS = 1
+GAIN = 30
 
 
 class GenICamNotFoundError(Exception):
@@ -48,8 +49,7 @@ class GenICam:
         else:
             self.ia.remote_device.node_map.AcquisitionFrameRateAbs.value = FPS
 
-        self.ia.remote_device.node_map.Gain.value = 20
-        self.ia.start()  # start image acquisition
+        self.ia.remote_device.node_map.Gain.value = GAIN
 
     def _print_link_info(self, key, value):
         dev_parent = None
@@ -77,6 +77,7 @@ class GenICam:
 
         # Store frames in RAM
         start_time = datetime.now()
+        self.ia.start()  # start image acquisition
         for i in range(N_FRAMES):
             with self.ia.fetch(timeout=3) as buffer:
                 frames[i] = buffer.payload.components[0].data.reshape(
@@ -84,6 +85,7 @@ class GenICam:
                     buffer.payload.components[0].width,
                     # CHANNELS,
                 )
+        self.ia.stop()  # stop image acquisition
         delta_t = (datetime.now() - start_time).total_seconds()
 
         expected_t = N_FRAMES / FPS
@@ -140,7 +142,6 @@ class GenICam:
         return self._list_children(map, "value")
 
     def __del__(self):
-        self.ia.stop()  # stop image acquisition
         self.ia.destroy()
         self.h.reset()  # Needed? Need to add .update to init?
 
