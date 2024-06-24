@@ -93,6 +93,8 @@ class GenICam:
         print(
             f"Transfered: {transferred_data} MB in {delta_t}s (expected {expected_t}s)"
         )
+        print(f"Expected Speed: {FPS} FPS")
+        print(f"Measured Speed: {N_FRAMES/delta_t} FPS")
         print(f"Expected Transfer Speed: {transferred_data/expected_t} MB/s")
         print(f"Measured Transfer Speed: {transferred_data/delta_t} MB/s")
 
