@@ -9,13 +9,15 @@ from harvesters.core import Harvester
 WIDTH = 1920  # Image buffer width
 HEIGHT = 1200  # Image buffer height
 PIXEL_FORMAT = "Mono8"  # Camera pixel format
-SDK_CTI_PATH = "/opt/mvIMPACT_Acquire/lib/x86_64/mvGenTLProducer.cti"  # Common transport interface
+SDK_CTI_PATH = (
+    "/opt/mvIMPACT_Acquire/lib/x86_64/mvGenTLProducer.cti"  # Common transport interface
+)
 # CAMERA_SERIAL = "50-0536906292"  # Camera product model
 # CAMERA_SERIAL = "50-0503346450"  # Camera product model
 CAMERA_SERIAL = "17497407"  # Camera product model
-FPS = 32
+FPS = 155  # 32
 OUTPUT = "RESULT"  # video name (without extension)
-N_FRAMES = 30
+N_FRAMES = 100
 CHANNELS = 1
 
 
@@ -85,8 +87,10 @@ class GenICam:
         delta_t = (datetime.now() - start_time).total_seconds()
 
         expected_t = N_FRAMES / FPS
-        transferred_data = frames.nbytes/1E+6
-        print(f"Transfered: {transferred_data} MB")
+        transferred_data = frames.nbytes / 1e6
+        print(
+            f"Transfered: {transferred_data} MB in {delta_t}s (expected {expected_t}s)"
+        )
         print(f"Expected Transfer Speed: {transferred_data/expected_t} MB/s")
         print(f"Measured Transfer Speed: {transferred_data/delta_t} MB/s")
 
